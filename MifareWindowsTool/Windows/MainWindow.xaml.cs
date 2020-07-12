@@ -569,8 +569,6 @@ namespace MCT_Windows
             var dr = ofd.ShowDialog();
             if (dr.Value)
             {
-
-
                 ShowDump(ofd.FileName);
             }
             else

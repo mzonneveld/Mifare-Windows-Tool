@@ -6,7 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -106,25 +109,54 @@ namespace MCT_Windows.Windows
 
 
         }
+
         public byte[] StringToByteArray(string hex)
         {
             return Enumerable.Range(0, hex.Length).Where(x => x % 2 == 0)
                              .Select(x => Convert.ToByte(hex.Substring(x, 2), 16)).ToArray();
         }
+
         private List<string> Split(string str, int chunkSize)
         {
             return Enumerable.Range(0, str.Length / chunkSize)
                 .Select(i => str.Substring(i * chunkSize, chunkSize) + "\r").ToList();
         }
 
+        /// <summary>
+        /// Save content of window to file
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnSaveDump_Click(object sender, RoutedEventArgs e)
         {
-
             var dr = sfd.ShowDialog();
             if (dr.Value)
-                System.IO.File.WriteAllBytes(sfd.FileName, bytesDataA);
+            {
+                // Set to Hex
+                if (!bConvertoAscii) btnShowAsAscii_Click(null, null);
 
+                // Text
+                TextRange textRange = new TextRange(txtOutput.Document.ContentStart, txtOutput.Document.ContentEnd);
+
+                // Get Lines
+                var strSplit = textRange.Text.Trim().Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                // Only keep hex data
+                for (var i = 75; i >= 0; i--)
+                    if (i % 5 == 0) strSplit.RemoveAt(i);
+
+                // To ByteArray
+                var bytes = StringToByteArray(string.Join("", strSplit)).ToList();
+
+                // Save original
+                // System.IO.File.WriteAllBytes(sfd.FileName, bytesDataA);
+
+                // Save File
+                System.IO.File.WriteAllBytes(sfd.FileName, bytes.ToArray());
+            }
         }
+
+
 
         private void btnClose_Click(object sender, RoutedEventArgs e)
         {
@@ -158,6 +190,7 @@ namespace MCT_Windows.Windows
             txtOutput.Document = new System.Windows.Documents.FlowDocument();
             txtOutput.AppendText(new string(LinesA.SelectMany(c => c).ToArray()));
         }
+
         private void BtnOpenDumpA_Click(object sender, RoutedEventArgs e)
         {
             var fileName = OpenDump(ref bytesDataA);
@@ -165,7 +198,8 @@ namespace MCT_Windows.Windows
                 btnOpenDumpA.Content = $"{Translate.Key(nameof(MifareWindowsTool.Properties.Resources.OpenDump))} A: {Path.GetFileNameWithoutExtension(fileName)}";
 
         }
-        private void BtnOpenDumpB_Click(object sender, RoutedEventArgs e)
+        private void
+            BtnOpenDumpB_Click(object sender, RoutedEventArgs e)
         {
             var fileName = OpenDump(ref bytesDataB);
             if (!string.IsNullOrWhiteSpace(fileName))
