@@ -39,7 +39,7 @@ namespace MCT_Windows
             this.Icon = BitmapFrame.Create(iconUri);
             foreach (var f in Directory.GetFiles("Keys", "*.keys", SearchOption.AllDirectories))
             {
-                ucLK.lstKeys.Items.Add(new File() { FileName = System.IO.Path.GetFileName(f), IsSelected = false });
+                ucLK.lstKeys.Items.Add(new File() { FileName = System.IO.Path.GetFileName(f), IsSelected = f.Contains("std.keys") });
             }
         }
 

@@ -135,24 +135,43 @@ namespace MCT_Windows.Windows
                 // Set to Hex
                 if (!bConvertoAscii) btnShowAsAscii_Click(null, null);
 
-                // Text
+                // Get Text
                 TextRange textRange = new TextRange(txtOutput.Document.ContentStart, txtOutput.Document.ContentEnd);
 
                 // Get Lines
                 var strSplit = textRange.Text.Trim().Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                // Only keep hex data
-                for (var i = 75; i >= 0; i--)
-                    if (i % 5 == 0) strSplit.RemoveAt(i);
+                // Remove Whitespace
+                strSplit.ForEach(x => x = x.Trim().Trim(new char[] { '\n', '\r' }));
 
-                // To ByteArray
-                var bytes = StringToByteArray(string.Join("", strSplit)).ToList();
 
                 // Save original
                 // System.IO.File.WriteAllBytes(sfd.FileName, bytesDataA);
 
-                // Save File
-                System.IO.File.WriteAllBytes(sfd.FileName, bytes.ToArray());
+                try
+                {
+                    // Keep hex data only
+                    strSplit = strSplit.Where(x => (x.Trim() != "" && !x.Contains("+Sector:"))).ToList();
+
+                    // Check
+                    if (strSplit.Count == 64)
+                    {
+                        // To ByteArray
+                        var bytes = StringToByteArray(string.Join("", strSplit)).ToList();
+
+                        // Save File
+                        System.IO.File.WriteAllBytes(sfd.FileName, bytes.ToArray());
+                    }
+                    else {
+                        MessageBox.Show("Hex data length should be 64 x 16 = 1024 bytes");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+
+
             }
         }
 
