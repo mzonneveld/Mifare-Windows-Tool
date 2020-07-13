@@ -151,7 +151,10 @@ namespace MCT_Windows.Windows
                 try
                 {
                     // Keep hex data only
-                    strSplit = strSplit.Where(x => (x.Trim() != "" && !x.Contains("+Sector:"))).ToList();
+                    strSplit = strSplit
+                        .Where(x => (x.Trim() != "" && !x.Contains("+Sector:")))
+                        .Select(x => x.Trim())
+                        .ToList();
 
                     // Check
                     if (strSplit.Count == 64)
@@ -162,7 +165,8 @@ namespace MCT_Windows.Windows
                         // Save File
                         System.IO.File.WriteAllBytes(sfd.FileName, bytes.ToArray());
                     }
-                    else {
+                    else
+                    {
                         MessageBox.Show("Hex data length should be 64 x 16 = 1024 bytes");
                     }
                 }
