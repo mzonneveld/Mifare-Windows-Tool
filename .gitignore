@@ -340,3 +340,4 @@ ASALocalRun/
 healthchecksdb
 *.dump
 MifareWindowsTool/keys/tatasteel.keys
+*.lnk
